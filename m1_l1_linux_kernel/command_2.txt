@@ -1,0 +1,79 @@
+    1  cat /etc/networks 
+    2  ifconfig
+    3  yum update
+    4  uname -r
+    5  gcc --version
+    6  yum install centos-release-scl
+    7  yum install devtoolset-7-gcc*
+    8  scl enable devtoolset-7 bash
+    9  which gcc
+   10  gcc --version
+   11  hostnamectl
+   12  yum update
+   13  yum search kernel-devel
+   14  yum install kernel-devel.x86_64
+   15  yum search ncurses
+   16  yum install wget gcc ncurses-devel.x86_64
+   17  gcc -version
+   18  gcc --version
+   19  cd /usr/src/
+   20  wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.20.5.tar.xz
+   21  ls -a
+   22  tar fxvJ linux-4.20.5.tar.xz 
+   23  ls -a
+   24  ln -sv linux-4.20.5
+   25  ls -al
+   26  ln -sv linux-4.20.5 linux
+   27  ls -al
+   28  cd linux
+   29  ls -a
+   30  uname -r
+   31  cp -v /boot/config-3.10.0-957.el7.x86_64 
+   32  cp /boot/config* .config
+   33  ls -a
+   34  cp -v /boot/config-$(uname -r) .
+   35  ls -a
+   36  make clean
+   37  make menuconfig
+   38  yum install bison
+   39  pwd
+   40  init 0
+   41  which gcc
+   42  gcc --version
+   43  pwd
+   44  ls -a
+   45  cd linux
+   46  ls
+   47  yum groupinstall "Development Tools"
+   48  yum install ncurses-devel
+   49  yum install gt3-devel
+   50  yum install qt3-devel
+   51  yum install hmaccalc zlib-devel binutils-devel elfutils-libelf-devel
+   52  ls
+   53  make mrproper
+   54  make menuconfig
+   55  ls -a
+   56  make dep
+   57  make bzImage
+   58  yum install bc
+   59  yum install openssl-devel
+   60  make bzImage
+   61  ls arch/x86/boot/
+   62  ls -a
+   63  make modules
+   64       
+   65  make modules
+   66  make modules_install
+   67  make install
+   68  history
+   69  pwd
+   70  history >> command.txt
+   71  less command.txt 
+   72  cat /boot/grub2/
+   73  cat /boot/grub2/grub.cfg 
+   74  cat /boot/grub2/grub.cfg | grep menuentry
+   75  nano /etc/default/grub 
+   76  yum install nano
+   77  nano /etc/default/grub 
+   78  grub2-mkconfig -o /boot/grub2/grub.cfg 
+   79  history >> command_2.txt
