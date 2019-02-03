@@ -1,0 +1,33 @@
+lsblk -a >> lsblk_old.txt
+curl -T /root/lsblk_old.txt https://webdav.yandex.ru/lsblk_old.txt --user ***************:***************
+sfdisk -d /dev/sda | sfdisk /dev/sdb
+fdisk -l
+fdisk /dev/sdb
+fdisk -l
+mdadm --create /dev/md0 --level=1 --raid-devices=2 missing /dev/sdb1
+cat /proc/mdstat
+mkfs.ext4 /dev/md0
+mount /dev/md0 /mnt/
+rsync -auxHAXSv --exclude=/dev/* --exclude=/proc/* --exclude=/sys/* --exclude=/tmp/* --exclude=/mnt/* /* /mnt
+mount --bind /proc /mnt/proc
+mount --bind /dev /mnt/dev
+mount --bind /sys /mnt/sys
+mount --bind /run /mnt/run
+chroot /mnt/
+blkid /dev/md*
+nano /etc/fstab
+mdadm --detail --scan > /etc/mdadm.conf
+cp /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.bck
+dracut --mdadmconf --fstab --add="mdraid" --filesystems "xfs ext4 ext3" --add-drivers="raid1" --force /boot/initramfs-$(uname -r).img $(uname -r) -M 
+nano /etc/default/grub
+grub2-mkconfig -o /boot/grub2/grub.cfg
+grub2-install /dev/sdb
+reboot
+lsblk -a >> lsblk_new_after_reboot.txt
+curl -T /root/lsblk_new_after_reboot.txt https://webdav.yandex.ru/lsblk_new_after_reboot.txt --user ***************:***************
+fdisk /dev/sda
+mdadm --manage /dev/md0 --add /dev/sda1
+grub2-install /dev/sda
+watch -n1 "cat /proc/mdstat"
+lsblk -a >> lsblk_new_final.txt
+curl -T /root/lsblk_new_final.txt https://webdav.yandex.ru/lsblk_new_final.txt --user ****************:*************
