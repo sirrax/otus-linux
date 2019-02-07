@@ -1,0 +1,533 @@
+# root@lvm:~\[root@lvm ~]# lsblk -l
+NAME                MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                   8:0    0   40G  0 disk 
+sda1                  8:1    0    1M  0 part 
+sda2                  8:2    0    1G  0 part /boot
+sda3                  8:3    0   39G  0 part 
+VolGroup00-LogVol00 253:0    0 37.5G  0 lvm  /
+VolGroup00-LogVol01 253:1    0  1.5G  0 lvm  [SWAP]
+sdb                   8:16   0   10G  0 disk 
+sdc                   8:32   0    2G  0 disk 
+sdd                   8:48   0    1G  0 disk 
+sde                   8:64   0    1G  0 disk 
+
+# root@lvm:~\[root@lvm ~]# cat /etc/redhat-release
+CentOS Linux release 7.5.1804 (Core) 
+
+# root@lvm:~\[root@lvm ~]# yum install http://download.zfsonlinux.org/epel/zfs-release.el7_5.noarch.rpm
+
+
+# root@lvm:~\[root@lvm ~]# nano /etc/yum.repos.d/zfs.repo
+
+  GNU nano 2.3.1                                                  File: /etc/yum.repos.d/zfs.repo                                                                                                           [zfs]
+name=ZFS on Linux for EL7 - dkms
+baseurl=http://download.zfsonlinux.org/epel/7.5/$basearch/
+enabled=1
+metadata_expire=7d
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
+[zfs-kmod]
+
+name=ZFS on Linux for EL7 - kmod
+baseurl=http://download.zfsonlinux.org/epel/7.5/kmod/$basearch/
+enabled=0
+metadata_expire=7d
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
+[zfs-source]
+
+name=ZFS on Linux for EL7 - Source
+baseurl=http://download.zfsonlinux.org/epel/7.5/SRPMS/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
+ 
+
+# root@lvm:~\[root@lvm ~]# yum install zfs
+
+reboot
+
+# root@lvm:~\[root@lvm ~]# # root@lvm:~\[root@lvm ~]# lsmod | grep zfs
+
+# root@lvm:~\[root@lvm ~]# modprobe zfs
+
+# root@lvm:~\[root@lvm ~]# # root@lvm:~\[root@lvm ~]# lsmod | grep zfs
+zfs                  3564468  0 
+zunicode              331170  1 zfs
+zavl                   15236  1 zfs
+icp                   270148  1 zfs
+zcommon                73440  1 zfs
+znvpair                89131  2 zfs,zcommon
+spl                   102412  4 icp,zfs,zcommon,znvpair
+
+# root@lvm:~\[root@lvm ~]# lsblk
+NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                       8:0    0   40G  0 disk 
+├─sda1                    8:1    0    1M  0 part 
+├─sda2                    8:2    0    1G  0 part /boot
+└─sda3                    8:3    0   39G  0 part 
+  ├─VolGroup00-LogVol00 253:0    0 37.5G  0 lvm  /
+  └─VolGroup00-LogVol01 253:1    0  1.5G  0 lvm  [SWAP]
+sdb                       8:16   0   10G  0 disk 
+sdc                       8:32   0    2G  0 disk 
+sdd                       8:48   0    1G  0 disk 
+sde                       8:64   0    1G  0 disk 
+
+# root@lvm:~\[root@lvm ~]# zpool create files /dev/sdd /dev/sde
+
+# root@lvm:~\[root@lvm ~]# zpool list
+NAME    SIZE  ALLOC   FREE  EXPANDSZ   FRAG    CAP  DEDUP  HEALTH  ALTROOT
+files  1.97G   104K  1.97G         -     0%     0%  1.00x  ONLINE  -
+
+# root@lvm:~\[root@lvm ~]# df -h
+Filesystem                       Size  Used Avail Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00   38G  819M   37G   3% /
+devtmpfs                         109M     0  109M   0% /dev
+tmpfs                            118M     0  118M   0% /dev/shm
+tmpfs                            118M  4.5M  114M   4% /run
+tmpfs                            118M     0  118M   0% /sys/fs/cgroup
+/dev/sda2                       1014M   63M  952M   7% /boot
+tmpfs                             24M     0   24M   0% /run/user/1000
+files                            1.9G     0  1.9G   0% /files
+
+
+# root@lvm:~\[root@lvm ~]# cd /files/
+
+# root@lvm:/files\[root@lvm files]# chown -Rfv root:root /files
+
+# root@lvm:/files\[root@lvm files]# touch test.file
+
+# root@lvm:/files\[root@lvm files]# ls
+test.file
+
+# root@lvm:~\[root@lvm ~]# df -T
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       39269648 838232  38431416   3% /
+devtmpfs                        devtmpfs    110948      0    110948   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4604    116088   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sda2                       xfs        1038336  64076    974260   7% /boot
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+files                           zfs        1933184      0   1933184   0% /files
+
+# root@lvm:~\[root@lvm ~]# zpool status
+  pool: files
+ state: ONLINE
+  scan: none requested
+config:
+
+	NAME        STATE     READ WRITE CKSUM
+	files       ONLINE       0     0     0
+	  sdd       ONLINE       0     0     0
+	  sde       ONLINE       0     0     0
+
+errors: No known data errors
+
+# root@lvm:~\[root@lvm ~]# zfs list
+NAME    USED  AVAIL  REFER  MOUNTPOINT
+files    84K  1.84G  25.5K  /files
+
+# root@lvm:~\[root@lvm ~]#lsblk
+NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                       8:0    0   40G  0 disk 
+├─sda1                    8:1    0    1M  0 part 
+├─sda2                    8:2    0    1G  0 part /boot
+└─sda3                    8:3    0   39G  0 part 
+  ├─VolGroup00-LogVol00 253:0    0 37.5G  0 lvm  /
+  └─VolGroup00-LogVol01 253:1    0  1.5G  0 lvm  [SWAP]
+sdb                       8:16   0   10G  0 disk 
+sdc                       8:32   0    2G  0 disk 
+sdd                       8:48   0    1G  0 disk 
+├─sdd1                    8:49   0 1014M  0 part 
+└─sdd9                    8:57   0    8M  0 part 
+sde                       8:64   0    1G  0 disk 
+├─sde1                    8:65   0 1014M  0 part 
+└─sde9                    8:73   0    8M  0 part 
+
+# root@lvm:~\[root@lvm ~]# df -h
+Filesystem                       Size  Used Avail Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00   38G  819M   37G   3% /
+devtmpfs                         109M     0  109M   0% /dev
+tmpfs                            118M     0  118M   0% /dev/shm
+tmpfs                            118M  4.5M  114M   4% /run
+tmpfs                            118M     0  118M   0% /sys/fs/cgroup
+/dev/sda2                       1014M   63M  952M   7% /boot
+tmpfs                             24M     0   24M   0% /run/user/1000
+files                            1.9G     0  1.9G   0% /files
+
+# root@lvm:~\[root@lvm ~]# fdisk /dev/sdc
+Welcome to fdisk (util-linux 2.23.2).
+
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+Device does not contain a recognized partition table
+Building a new DOS disklabel with disk identifier 0xd022c64c.
+
+Command (m for help): n
+Partition type:
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended
+Select (default p): p
+Partition number (1-4, default 1): 
+First sector (2048-4194303, default 2048): 
+Using default value 2048
+Last sector, +sectors or +size{K,M,G} (2048-4194303, default 4194303): +1G
+Partition 1 of type Linux and of size 1 GiB is set
+
+Command (m for help): w
+The partition table has been altered!
+
+Calling ioctl() to re-read partition table.
+Syncing disks.
+
+# root@lvm:~\[root@lvm ~]# lsblk 
+NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                       8:0    0   40G  0 disk 
+├─sda1                    8:1    0    1M  0 part 
+├─sda2                    8:2    0    1G  0 part /boot
+└─sda3                    8:3    0   39G  0 part 
+  ├─VolGroup00-LogVol00 253:0    0 37.5G  0 lvm  /
+  └─VolGroup00-LogVol01 253:1    0  1.5G  0 lvm  [SWAP]
+sdb                       8:16   0   10G  0 disk 
+sdc                       8:32   0    2G  0 disk 
+└─sdc1                    8:33   0    1G  0 part 
+sdd                       8:48   0    1G  0 disk 
+├─sdd1                    8:49   0 1014M  0 part 
+└─sdd9                    8:57   0    8M  0 part 
+sde                       8:64   0    1G  0 disk 
+├─sde1                    8:65   0 1014M  0 part 
+└─sde9                    8:73   0    8M  0 part 
+
+# root@lvm:~\[root@lvm ~]# fdisk /dev/sdc
+Welcome to fdisk (util-linux 2.23.2).
+
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+Command (m for help): n
+Partition type:
+   p   primary (1 primary, 0 extended, 3 free)
+   e   extended
+Select (default p): p
+Partition number (2-4, default 2): 
+First sector (2099200-4194303, default 2099200): 
+Using default value 2099200
+Last sector, +sectors or +size{K,M,G} (2099200-4194303, default 4194303): 
+Using default value 4194303
+Partition 2 of type Linux and of size 1023 MiB is set
+
+Command (m for help): w
+The partition table has been altered!
+
+Calling ioctl() to re-read partition table.
+Syncing disks.
+
+# root@lvm:~\[root@lvm ~]# lsblk 
+NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                       8:0    0   40G  0 disk 
+├─sda1                    8:1    0    1M  0 part 
+├─sda2                    8:2    0    1G  0 part /boot
+└─sda3                    8:3    0   39G  0 part 
+  ├─VolGroup00-LogVol00 253:0    0 37.5G  0 lvm  /
+  └─VolGroup00-LogVol01 253:1    0  1.5G  0 lvm  [SWAP]
+sdb                       8:16   0   10G  0 disk 
+sdc                       8:32   0    2G  0 disk 
+├─sdc1                    8:33   0    1G  0 part 
+└─sdc2                    8:34   0 1023M  0 part 
+sdd                       8:48   0    1G  0 disk 
+├─sdd1                    8:49   0 1014M  0 part 
+└─sdd9                    8:57   0    8M  0 part 
+sde                       8:64   0    1G  0 disk 
+├─sde1                    8:65   0 1014M  0 part 
+└─sde9                    8:73   0    8M  0 part 
+
+# root@lvm:~\[root@lvm ~]# zpool status
+  pool: files
+ state: ONLINE
+  scan: none requested
+config:
+
+	NAME        STATE     READ WRITE CKSUM
+	files       ONLINE       0     0     0
+	  sdd       ONLINE       0     0     0
+	  sde       ONLINE       0     0     0
+
+errors: No known data errors
+
+# root@lvm:~\[root@lvm ~]# zpool filesadd files sdc1
+
+# root@lvm:~\[root@lvm ~]# lcblsblk 
+NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                       8:0    0   40G  0 disk 
+├─sda1                    8:1    0    1M  0 part 
+├─sda2                    8:2    0    1G  0 part /boot
+└─sda3                    8:3    0   39G  0 part 
+  ├─VolGroup00-LogVol00 253:0    0 37.5G  0 lvm  /
+  └─VolGroup00-LogVol01 253:1    0  1.5G  0 lvm  [SWAP]
+sdb                       8:16   0   10G  0 disk 
+sdc                       8:32   0    2G  0 disk 
+├─sdc1                    8:33   0    1G  0 part 
+└─sdc2                    8:34   0 1023M  0 part 
+sdd                       8:48   0    1G  0 disk 
+├─sdd1                    8:49   0 1014M  0 part 
+└─sdd9                    8:57   0    8M  0 part 
+sde                       8:64   0    1G  0 disk 
+├─sde1                    8:65   0 1014M  0 part 
+└─sde9                    8:73   0    8M  0 part 
+
+# root@lvm:~\[root@lvm ~]# df -T
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       39269648 838376  38431272   3% /
+devtmpfs                        devtmpfs    110948      0    110948   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4668    116024   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sda2                       xfs        1038336  64076    974260   7% /boot
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+files                           zfs        2965376      0   2965376   0% /files
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/0
+
+# root@lvm:~\[root@lvm ~]# zpool status
+  pool: files
+ state: ONLINE
+  scan: none requested
+config:
+
+	NAME        STATE     READ WRITE CKSUM
+	files       ONLINE       0     0     0
+	  sdd       ONLINE       0     0     0
+	  sde       ONLINE       0     0     0
+	  sdc1      ONLINE       0     0     0
+
+errors: No known data errors
+
+# root@lvm:~\[root@lvm ~]# zpool add files cache sdc2
+
+# root@lvm:~\[root@lvm ~]# zpool status
+  pool: files
+ state: ONLINE
+  scan: none requested
+config:
+
+	NAME        STATE     READ WRITE CKSUM
+	files       ONLINE       0     0     0
+	  sdd       ONLINE       0     0     0
+	  sde       ONLINE       0     0     0
+	  sdc1      ONLINE       0     0     0
+	cache
+	  sdc2      ONLINE       0     0     0
+
+errors: No known data errors
+
+# root@lvm:~\[root@lvm ~]# df -T
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       39269648 838224  38431424   3% /
+devtmpfs                        devtmpfs    110948      0    110948   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4668    116024   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sda2                       xfs        1038336  64076    974260   7% /boot
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+files                           zfs        2965376      0   2965376   0% /files
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/0
+
+
+# root@lvm:~\[root@lvm ~]# zfs set mountpoint=/mnt files
+
+# root@lvm:~\[root@lvm ~]# zfs get mountpoint files
+NAME   PROPERTY    VALUE       SOURCE
+files  mountpoint  /mnt        local
+
+# root@lvm:~\[root@lvm ~]# zfs get mounted files
+NAME   PROPERTY  VALUE    SOURCE
+files  mounted   yes      -
+
+# root@lvm:~\[root@lvm ~]# df -T
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       39269648 838532  38431116   3% /
+devtmpfs                        devtmpfs    110948      0    110948   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4668    116024   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sda2                       xfs        1038336  64076    974260   7% /boot
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/0
+files                           zfs        2965376      0   2965376   0% /mnt
+
+
+# root@lvm:~\[root@lvm ~]# zfs set mountpoint=/opt files
+
+# root@lvm:~\[root@lvm ~]# df -T
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       39269648 838440  38431208   3% /
+devtmpfs                        devtmpfs    110948      0    110948   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4668    116024   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sda2                       xfs        1038336  64076    974260   7% /boot
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/0
+files                           zfs        2965376      0   2965376   0% /opt
+
+# root@lvm:~\[root@lvm ~]# cd /opt/
+
+# root@lvm:/opt\[root@lvm opt]# ls -a
+  .  test.file
+# root@lvm:/opt\[root@lvm opt]# mkdir test1
+
+# root@lvm:~\[root@lvm ~]# zfs create files/firm1
+# root@lvm:~\[root@lvm ~]# zfs create files/firm1/user1
+# root@lvm:~\[root@lvm ~]# zfs create files/firm1/user2
+# root@lvm:~\[root@lvm ~]# zfs create files/firm1/user3
+# root@lvm:~\[root@lvm ~]# zfs create files/firm2
+# root@lvm:~\[root@lvm ~]# zfs create files/firm3
+
+# root@lvm:~\[root@lvm ~]# zpool status
+  pool: files
+ state: ONLINE
+  scan: none requested
+config:
+
+	NAME        STATE     READ WRITE CKSUM
+	files       ONLINE       0     0     0
+	  sdd       ONLINE       0     0     0
+	  sde       ONLINE       0     0     0
+	  sdc1      ONLINE       0     0     0
+	cache
+	  sdc2      ONLINE       0     0     0
+
+errors: No known data errors
+
+# root@lvm:~\[root@lvm ~]# df -T
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       39269648 838476  38431172   3% /
+devtmpfs                        devtmpfs    110948      0    110948   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4620    116072   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sda2                       xfs        1038336  64076    974260   7% /boot
+files                           zfs        2965120      0   2965120   0% /opt
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+files/firm1                     zfs        2965120      0   2965120   0% /opt/firm1
+files/firm2                     zfs        2965120      0   2965120   0% /opt/firm2
+files/firm3                     zfs        2965120      0   2965120   0% /opt/firm3
+files/firm1/user1               zfs        2965120      0   2965120   0% /opt/firm1/user1
+files/firm1/user2               zfs        2965120      0   2965120   0% /opt/firm1/user2
+files/firm1/user3               zfs        2965120      0   2965120   0% /opt/firm1/user3
+
+# root@lvm:~\[root@lvm ~]# df -Tzpool statusfs create files/firm1/user32131/user123
+[16Ppool status[7Pdf -Tcd /opt/firm1/user1/
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# pwd
+/opt/firm1/user1
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# touch fileuser11
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# touch fileuser112
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# cd ..
+# root@lvm:/opt/firm1\[root@lvm firm1]# cd /usr/cd user2/
+# root@lvm:/opt/firm1/user2\[root@lvm user2]# touch fileuser21
+# root@lvm:/opt/firm1/user2\[root@lvm user2]# touch fileuser212
+# root@lvm:/opt/firm1/user2\[root@lvm user2]# cd
+# root@lvm:~\[root@lvm ~]# cd /opt/firm1/user1
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# nano fileuser11
+
+
+
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# [root@lvm user1]# cd
+# root@lvm:~\[root@lvm ~]# cdnano fileuser11cd /opt/firm1/user1touch fileuser221
+[7Pcd user2/[4P..touch fileuser121
+pwdcd /opt/firm1/user1/
+df -Tzpool statusfs create files/firm1/user3
+[16Ppool statusfs create files/firm1/user3
+[16Ppool status
+  pool: files
+ state: ONLINE
+  scan: none requested
+config:
+
+	NAME        STATE     READ WRITE CKSUM
+	files       ONLINE       0     0     0
+	  sdd       ONLINE       0     0     0
+	  sde       ONLINE       0     0     0
+	  sdc1      ONLINE       0     0     0
+	cache
+	  sdc2      ONLINE       0     0     0
+
+errors: No known data errors
+
+# root@lvm:~\[root@lvm ~]# df -T
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       39269648 838500  38431148   3% /
+devtmpfs                        devtmpfs    110948      0    110948   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4620    116072   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sda2                       xfs        1038336  64076    974260   7% /boot
+files                           zfs        2965120      0   2965120   0% /opt
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+files/firm1                     zfs        2965120      0   2965120   0% /opt/firm1
+files/firm2                     zfs        2965120      0   2965120   0% /opt/firm2
+files/firm3                     zfs        2965120      0   2965120   0% /opt/firm3
+files/firm1/user1               zfs        2965120      0   2965120   0% /opt/firm1/user1
+files/firm1/user2               zfs        2965120      0   2965120   0% /opt/firm1/user2
+files/firm1/user3               zfs        2965120      0   2965120   0% /opt/firm1/user3
+
+# root@lvm:~\[root@lvm ~]# zfs snapshot files/firm1/user1@snapus1
+
+# root@lvm:~\[root@lvm ~]# zfs list
+NAME                USED  AVAIL  REFER  MOUNTPOINT
+files              1.61M  2.83G  26.5K  /opt
+files/firm1         103K  2.83G  26.5K  /opt/firm1
+files/firm1/user1  26.5K  2.83G  26.5K  /opt/firm1/user1
+files/firm1/user2    26K  2.83G    26K  /opt/firm1/user2
+files/firm1/user3    24K  2.83G    24K  /opt/firm1/user3
+files/firm2          24K  2.83G    24K  /opt/firm2
+files/firm3          24K  2.83G    24K  /opt/firm3
+
+# root@lvm:~\[root@lvm ~]# cd /opt/firm1/user1
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# ls -a
+.  ..  fileuser11  fileuser12
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# pwd
+/opt/firm1/user1
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# cd
+# root@lvm:~\[root@lvm ~]# find / -name snapus1
+
+# root@lvm:~\[root@lvm ~]# zfs list -t snapshot
+NAME                        USED  AVAIL  REFER  MOUNTPOINT
+files@dz3                  18.5K      -  28.5K  -
+files/firm1/user1@snapus1    13K      -  26.5K  -
+
+# root@lvm:~\[root@lvm ~]# zfs list -o space
+NAME               AVAIL   USED  USEDSNAP  USEDDS  USEDREFRESERV  USEDCHILD
+files              2.83G   365K     18.5K   26.5K             0B       320K
+files/firm1        2.83G   116K        0B   26.5K             0B      89.5K
+files/firm1/user1  2.83G  39.5K       13K   26.5K             0B         0B
+files/firm1/user2  2.83G    26K        0B     26K             0B         0B
+files/firm1/user3  2.83G    24K        0B     24K             0B         0B
+files/firm2        2.83G    24K        0B     24K             0B         0B
+files/firm3        2.83G    24K        0B     24K             0B         0B
+
+# root@lvm:~\[root@lvm ~]# cd /opt/firm1/user1/
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# ls -a
+.  ..  fileuser11  fileuser12
+
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# nano fileuser11
+
+
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# [root@lvm user1]# cd
+
+# root@lvm:~\[root@lvm ~]# zfs rollback -r files/firm1/user1@snapus1
+
+# root@lvm:~\[root@lvm ~]# cd /opt/firm1/user1
+
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# ls -a
+.  ..  fileuser11  fileuser12
+
+# root@lvm:/opt/firm1/user1\[root@lvm user1]# cat fileuser11
+Hello
+Hello
+Hello
+
+
+
+

@@ -1,0 +1,289 @@
+******************************************************
+Установка файловой системы ZFS
+
+Поддержка файловой системы ZFS по умолчанию не включена в CentOS 7. Это не единственная проблема. ZFS недоступна в официальном репозитории пакетов CentOS 7. Мы должны установить его из официального репозитория пакетов ZFS. 
+Сначала проверяем, какую версию CentOS 7 используем, с помощью следующей команды:
+
+cat /etc/redhat-release
+
+CentOS Linux release 7.5.1804 (Core) 
+
+
+Теперь вам нужно добавить официальный репозиторий ZFS в CentOS 7 с помощью следующей команды:
+
+yum install http://download.zfsonlinux.org/epel/zfs-release.el7_5.noarch.rpm
+
+Существует два способа загрузки модуля ZFS в ядро: DKMS и kABI. Разница между ними заключается в том, что если устанавливать модуль ZFS на основе DKMS, а затем по какой-то причине обновлять ядро своей операционной системы, модуль ядра ZFS необходимо перекомпилировать заново. В противном случае это не сработает. Но модуль ZFS на основе kABI имеет преимущество в том, что он не требует перекомпиляции, если ядро операционной системы обновлено.
+Будем использовать модуль ядра ZFS на основе kABI.
+Когда мы устанавили репозиторий ZFS в CentOS 7, репозиторий на основе DKMS включается по умолчанию. Поэтому мы должны отключить репозиторий на основе DKMS и включить репозиторий на основе kABI.
+Чтобы отключить хранилище ZFS на основе DKMS и включить хранилище ZFS на основе kABI, сначала открываем файл конфигурации yum ZFS в текстовом редакторе с помощью следующей команды:
+
+nano /etc/yum.repos.d/zfs.repo
+
+
+[zfs]
+name=ZFS on Linux for EL7 - dkms
+baseurl=http://download.zfsonlinux.org/epel/7.5/$basearch/
+enabled=0    							# Здесь меняем 1 ---> на 0 что бы отключить репозиторий ZFS на основе DKMS.
+metadata_expire=7d
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
+[zfs-kmod]
+
+name=ZFS on Linux for EL7 - kmod
+baseurl=http://download.zfsonlinux.org/epel/7.5/kmod/$basearch/
+enabled=1							# Здесь меняем 0 ---> на 1 чтобы включить репозитарий ZFS на основе kABI.
+metadata_expire=7d
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
+[zfs-source]
+
+name=ZFS on Linux for EL7 - Source
+baseurl=http://download.zfsonlinux.org/epel/7.5/SRPMS/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
+
+
+Теперь устанавливаем файловую систему ZFS на CentOS 7 с помощью следующей команды:
+
+yum install zfs
+
+И перезагружемся и вводим команду чтобы проверить, загружен ли модуль ядра ZFS.
+
+lsmod | grep zfs
+
+Мы не видим никаких результатов. значит модуль ядра ZFS не загрузился. Загрузим модуль ядра ZFS вручную.
+
+modprobe zfs
+
+Повторяем:
+lsmod | grep zfs
+zfs                  3564468  0 
+zunicode              331170  1 zfs
+zavl                   15236  1 zfs
+icp                   270148  1 zfs
+zcommon                73440  1 zfs
+znvpair                89131  2 zfs,zcommon
+spl                   102412  4 icp,zfs,zcommon,znvpair
+
+******************************************************************************************
+Базовая конфигурация ZFS
+
+В нашем случае выбираем диски sdd и sde
+
+lsblk
+NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                       8:0    0   40G  0 disk 
+├─sda1                    8:1    0    1M  0 part 
+├─sda2                    8:2    0    1G  0 part /boot
+└─sda3                    8:3    0   39G  0 part 
+  ├─VolGroup00-LogVol00 253:0    0 37.5G  0 lvm  /
+  └─VolGroup00-LogVol01 253:1    0  1.5G  0 lvm  [SWAP]
+sdb                       8:16   0   10G  0 disk 
+sdc                       8:32   0    2G  0 disk 
+sdd                       8:48   0    1G  0 disk 
+sde                       8:64   0    1G  0 disk 
+
+Теперь нужно создать пул ZFS. Назавем его files. Новый каталог files будет создан в каталоге ROOT (/). при создании указываем наши диски sdd sde.
+
+zpool create files /dev/sdd /dev/sde
+
+При помощи команды zpool list смотрим список всех доступных пулов ZFS системы:
+
+zpool list
+NAME    SIZE  ALLOC   FREE  EXPANDSZ   FRAG    CAP  DEDUP  HEALTH  ALTROOT
+files  1.97G   104K  1.97G         -     0%     0%  1.00x  ONLINE  -
+
+
+Выполняем команду df -h чтобы увидеть все точки монтирования системы:
+df -h
+Filesystem                       Size  Used Avail Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00   38G  819M   37G   3% /
+devtmpfs                         109M     0  109M   0% /dev
+tmpfs                            118M     0  118M   0% /dev/shm
+tmpfs                            118M  4.5M  114M   4% /run
+tmpfs                            118M     0  118M   0% /sys/fs/cgroup
+/dev/sda2                       1014M   63M  952M   7% /boot
+tmpfs                             24M     0   24M   0% /run/user/1000
+files                            1.9G     0  1.9G   0% /files
+
+Как видно , пул файлов ZFS монтируется в каталог / files.
+
+По умолчанию пул ZFS доступен для записи только пользователю root. Если мы, как обычный пользователь, хотим писать в пул ZFS, нам нужно изменить разрешение пула ZFS.
+
+chown -Rfv root:root /files  # Здесь я работал под рутом на самом деле нужно было указать пользователя и группу к примеру (vagrant:vagrant)
+
+**************************************************************************************
+
+Управление точками монтирования ZFS
+
+Создадим на диске sdc партиции:
+# root@lvm:~\[root@lvm ~]# lsblk 
+NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                       8:0    0   40G  0 disk 
+├─sda1                    8:1    0    1M  0 part 
+├─sda2                    8:2    0    1G  0 part /boot
+└─sda3                    8:3    0   39G  0 part 
+  ├─VolGroup00-LogVol00 253:0    0 37.5G  0 lvm  /
+  └─VolGroup00-LogVol01 253:1    0  1.5G  0 lvm  [SWAP]
+sdb                       8:16   0   10G  0 disk 
+sdc                       8:32   0    2G  0 disk 
+├─sdc1                    8:33   0    1G  0 part 
+└─sdc2                    8:34   0 1023M  0 part 
+sdd                       8:48   0    1G  0 disk 
+├─sdd1                    8:49   0 1014M  0 part 
+└─sdd9                    8:57   0    8M  0 part 
+sde                       8:64   0    1G  0 disk 
+├─sde1                    8:65   0 1014M  0 part 
+└─sde9                    8:73   0    8M  0 part 
+
+Добавляем в пул еще диск:
+
+zpool filesadd files sdc1
+
+zpool status
+  pool: files
+ state: ONLINE
+  scan: none requested
+config:
+
+	NAME        STATE     READ WRITE CKSUM
+	files       ONLINE       0     0     0
+	  sdd       ONLINE       0     0     0
+	  sde       ONLINE       0     0     0
+	  sdc1      ONLINE       0     0     0
+
+
+Так же смоделируем кэш L2ARC (кэш дисков якобы sdc2 - это SSD диск)
+
+zpool add files cache sdc2
+
+# root@lvm:~\[root@lvm ~]# zpool status
+  pool: files
+ state: ONLINE
+  scan: none requested
+config:
+
+	NAME        STATE     READ WRITE CKSUM
+	files       ONLINE       0     0     0
+	  sdd       ONLINE       0     0     0
+	  sde       ONLINE       0     0     0
+	  sdc1      ONLINE       0     0     0
+	cache
+	  sdc2      ONLINE       0     0     0
+
+
+По умолчанию все файловые системы ZFS монтируются ZFS при начальной загрузке с помощью службы SMF (Service Management Facility) svc://system/filesystem/local. Файловые системы монтируются в каталог /путь, где путь обозначает имя файловой системы. В нашем случае это files
+Точку монтирования по умолчанию можно переопределить путем указания для свойства mountpoint определенного пути при помощи команды zfs set.
+
+zfs set mountpoint=/mnt files
+zfs get mountpoint files
+zfs get mounted files
+
+df -T
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       39269648 838532  38431116   3% /
+devtmpfs                        devtmpfs    110948      0    110948   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4668    116024   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sda2                       xfs        1038336  64076    974260   7% /boot
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/0
+files                           zfs        2965376      0   2965376   0% /mnt
+
+В результате видим система ZFS смонтирована в /mnt
+
+При изменении свойства mountpoint файловая система автоматически размонтируется из старой точки монтирования и монтируется в новой точке. При необходимости создаются каталоги точки монтирования. Если автоматическое размонтирование файловой системы по причине ее активности невозможно, появляется сообщение об ошибке. В этом случае требуется принудительное размонтирование вручную.
+В нашем случае точка монтирования автаматически поменялась с /mnt на /opt
+
+zfs set mountpoint=/opt files
+
+df -T
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       39269648 838440  38431208   3% /
+devtmpfs                        devtmpfs    110948      0    110948   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4668    116024   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sda2                       xfs        1038336  64076    974260   7% /boot
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/0
+files                           zfs        2965376      0   2965376   0% /opt
+
+
+Создаем на нашем пуле ZFS пользовательские файловые системы с тестовым наполнением данных в дочерней системе user1.
+df -T
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       39269648 838500  38431148   3% /
+devtmpfs                        devtmpfs    110948      0    110948   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4620    116072   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sda2                       xfs        1038336  64076    974260   7% /boot
+files                           zfs        2965120      0   2965120   0% /opt
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+files/firm1                     zfs        2965120      0   2965120   0% /opt/firm1
+files/firm2                     zfs        2965120      0   2965120   0% /opt/firm2
+files/firm3                     zfs        2965120      0   2965120   0% /opt/firm3
+files/firm1/user1               zfs        2965120      0   2965120   0% /opt/firm1/user1
+files/firm1/user2               zfs        2965120      0   2965120   0% /opt/firm1/user2
+files/firm1/user3               zfs        2965120      0   2965120   0% /opt/firm1/user3
+
+Снимки создаются с помощью команды zfs snapshot, использующей в качестве единственного аргумента имя создаваемого снимка.
+Делаем снэпшот одной из дочерних систем - имя снэпшота snapus1
+
+zfs snapshot files/firm1/user1@snapus1
+
+Вносим изименения.
+Команда zfs rollback используется для отмены всех изменений, внесенных с момента создания определенного снимка. Файловая система возвращается в состояние, в котором она находилась на момент создания снимка. По умолчанию эта команда позволяет выполнить откат только к последнему созданному снимку. 
+Файловая система, для которой требуется выполнить откат, должна быть размонтирована и перемонтирована (если она смонтирована в настоящее время). Если размонтирование файловой системы невозможно, откат не выполняется. Для принудительного размонтирования файловой системы при необходимости можно использовать параметр -f.
+
+Откатываем наш снимок:
+
+zfs rollback -r files/firm1/user1@snapus1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
