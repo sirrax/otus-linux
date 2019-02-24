@@ -1,0 +1,118 @@
+Домашнее задание
+Размещаем свой RPM в своем репозитории
+1) создать свой RPM (можно взять свое приложение, либо собрать к примеру апач с определенными опциями)
+2) создать свой репо и разместить там свой RPM
+реализовать это все либо в вагранте, либо развернуть у себя через nginx и дать ссылку на репо
+
+* реализовать дополнительно пакет через docker
+Критерии оценки: 5 - есть репо и рпм
++1 - сделан еще и докер образ 
+****************************************************************************************************
+
+Для выполнения задания взял простенький VPS на:  https://virmach.com/
+План такой:
+-На сервер ставлю базовую версию ngingx (для размещения на нем своего репозитория)
+-Установка необходимых пакетов для сборки RPM и создания репозитория:
+yum install rpmdevtools rpm-build
+rpmdev-setuptree    # автоматически создается директория rpmbuild со структурой каталогов.
+yum install createrepo -y
+
+createrepo /usr/share/nginx/html # Инициализируем репозиторий 
+
+cat >> /etc/yum.repos.d/otus.repo << EOF # Добавим репозиторий в /etc/yum.repos.d
+[pol]
+name=Pol-Linux
+baseurl=http://50.3.70.152
+gpgcheck=0
+enabled=1
+EOF
+ 
+Для теста скачал готовый rpm пакет: tree-1.6.0-10.el7.x86_64.rpm и добавил его в свой репозиторий
+cp /root/tree-1.6.0-10.el7.x86_64.rpm /usr/share/nginx/html/
+createrepo --update /usr/share/nginx/html # обновление репозитория.
+
+
+## Сборка своего пакета и размещение его в репозитории:
+
+Собирать будем fbida — комплект приложений для просмотра изображений в консоли. 
+Скачиваем исходники fbida:
+
+cd ~/rpmbuild/SOURCES
+wget https://www.kraxel.org/releases/fbida/fbida-2.14.tar.gz
+wget https://www.kraxel.org/releases/fbida/fbida-2.14.tar.gz.asc
+
+Готовим SPEC файл
+
+cd ~/rpmbuild/SPECS
+vim ~/rpmbuild/SPECS/fbida.spec
+    Name:           fbida
+    Version:        2.14
+    Release:        1%{?dist}
+    Summary:        FrameBuffer Imageviewer
+
+    Vendor:         D.F.H.
+    Packager:       ChelAxe
+
+    Group:          Applications/Multimedia
+    License:        GPLv2+
+
+    URL:            https://www.kraxel.org/blog/linux/fbida/
+    Source:         https://www.kraxel.org/releases/fbida/fbida-%{version}.tar.gz
+
+    BuildRequires:  libexif-devel fontconfig-devel libjpeg-turbo-devel
+    BuildRequires:  libpng-devel libtiff-devel pkgconfig
+    BuildRequires:  giflib-devel libcurl-devel libXpm-devel
+    BuildRequires:  pixman-devel libepoxy-devel libdrm-devel
+    BuildRequires:  mesa-libEGL-devel poppler-devel poppler-glib-devel
+    BuildRequires:  freetype-devel mesa-libgbm-devel  
+    Requires:       libexif fontconfig libjpeg-turbo
+    Requires:       libpng libtiff giflib
+    Requires:       libcurl libXpm pixman
+    Requires:       libepoxy libdrm mesa-libEGL
+    Requires:       poppler poppler-glib freetype
+    Requires:       mesa-libgbm ImageMagick dejavu-sans-mono-fonts
+
+    %description
+    fbi displays the specified file(s) on the linux console using the
+    framebuffer device. PhotoCD, jpeg, ppm, gif, tiff, xwd, bmp and png
+    are supported directly. For other formats fbi tries to use
+    ImageMagick's convert.
+
+    %prep
+    %setup -q
+    %{__sed} -i -e "s,/X11R6,,g" GNUmakefile
+
+    %install
+    %__rm -rf %{buildroot}
+    %make_install PREFIX=/usr
+
+    %clean
+    %__rm -rf %{buildroot}
+
+    %files
+    %defattr(-,root,root,-)
+    %doc Changes COPYING INSTALL README TODO VERSION
+    %{_prefix}/*
+
+    %changelog
+    * Tue May  1 2018 ChelAxe (D.F.H.) <chelaxe@gmail.com> - 2.14-1%{?dist}
+    - Initial package.
+
+
+Сборка
+
+Собираем пакет и добавляем его в репозиторий:
+
+sudo yum install -y libexif-devel fontconfig-devel libjpeg-turbo-devel libpng-devel libtiff-devel pkgconfig giflib-devel libcurl-devel libXpm-devel ImageMagick dejavu-sans-mono-fonts pixman-devel libepoxy-devel libdrm-devel mesa-libEGL-devel poppler-devel poppler-glib-devel mesa-libgbm-devel
+
+rpmbuild -bb rpmbuild/SPECS/fbida.spec
+
+cp rpmbuild/RPMS/x86_64/fbida-2.14-1.el7.x86_64.rpm /usr/share/nginx/html/
+
+createrepo --update /usr/share/nginx/html/
+
+nginx -s reload
+
+Скачать данный пакет можно отсюда: 50.3.70.152
+wget http://50.3.70.152/fbida-2.14-1.el7.x86_64.rpm
+
