@@ -2,7 +2,7 @@
 ******************************************************************************
 ##### Первым делом посмотрим текущее состояние системы:
 
-![](https://raw.githubusercontent.com/sirrax/otus-linux/master/m1_l7_grub/dz2-lvm-change-vg/media/lvm1.jpg)
+![](https://raw.githubusercontent.com/sirrax/otus-linux/master/m1_l7_grub/dz2-lvm-change-vg/media/lvm3.jpg)
 
 Вся процедура по переименованию группы lvm,пересоздаем initrd image, чтобы он знал новое название Volume Group и внесению изменений в файлы:
 * /etc/fstab
@@ -27,5 +27,5 @@ sleep 5
 reboot
 ```
 ##### Проверяем измененое состояние системы после выполнения скрипта:
-![](https://raw.githubusercontent.com/sirrax/otus-linux/master/m1_l7_grub/dz2-lvm-change-vg/media/lvm2.jpg)
+![](https://raw.githubusercontent.com/sirrax/otus-linux/master/m1_l7_grub/dz2-lvm-change-vg/media/lvm4.jpg)
 
