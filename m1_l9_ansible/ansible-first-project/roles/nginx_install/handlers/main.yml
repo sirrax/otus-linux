@@ -1,0 +1,9 @@
+---
+# handlers file for nginx_install
+- name: Restart Nginx RedHat
+  systemd: name=nginx state=restarted
+  when: ansible_os_family == "RedHat"
+
+- name: Restart Nginx Debian
+  systemd: name=nginx state=restarted
+  when: ansible_os_family == "Debian"

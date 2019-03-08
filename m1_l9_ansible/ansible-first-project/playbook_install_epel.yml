@@ -1,0 +1,10 @@
+---
+- name: Install epel
+  hosts: gcp_centos_7
+  become: true
+  gather_facts: true
+
+  tasks:
+
+  - name: Install epel-releade reposytory
+    yum: name=nginx state=present

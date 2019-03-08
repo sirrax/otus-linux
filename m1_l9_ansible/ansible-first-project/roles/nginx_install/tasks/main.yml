@@ -1,0 +1,40 @@
+---
+# tasks file for nginx_install
+- name: Check and Print LINUX Vesrsion
+  debug: var=ansible_os_family
+
+- block: # Block for REDHAT  
+
+    - name: Install Nginx for RedHat
+      yum: name=nginx state=latest
+
+    - name: Start Nginx for RedHat
+      systemd: name=nginx state=started enabled=yes
+
+    - name: Setup Vars
+      set_fact: destin_folder=/etc/nginx destin_config_file=nginx.conf templ_name=nginx_centos.conf.j2
+   
+
+  when: ansible_os_family == "RedHat"
+
+- block: # Block for DEBIAN
+
+    - name: Install Nginx for Debian
+      apt: name=nginx state=latest
+
+    - name: Start Nginx for Debian
+      systemd: name=nginx state=started enabled=yes
+
+    - name: Setup Vars
+      set_fact: destin_folder=/etc/nginx/sites-enabled destin_config_file=default templ_name=nginx_ubuntu.conf.j2  
+
+  when: ansible_os_family == "Debian"   
+
+- name: Port_Nginx
+  template:
+     src={{ templ_name }} dest={{ destin_folder }}/{{ destin_config_file }}
+
+  
+  notify:
+    - Restart Nginx RedHat
+    - Restart Nginx Debian

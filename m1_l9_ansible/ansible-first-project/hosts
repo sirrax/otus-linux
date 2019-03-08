@@ -1,0 +1,6 @@
+[gcp_centos_7]
+otus-pol-1 ansible_host=35.198.88.157 ansible_user=pol
+otus-pol ansible_host=35.198.104.177 ansible_user=pol
+
+[digital_ocean_ubuntu_18]
+root ansible_host=134.209.93.207 ansible_user=root ansible_python_interpreter=/usr/bin/python3
