@@ -1,0 +1,12 @@
+#!/bin/bash
+
+DAT=$(date +"%m%d")
+for i in 0101 0223 0308 0501 0509 1107 1231
+do
+ if [ $DAT == $i ]
+ then
+  exit 1
+ fi
+done
+ exit 0
+
