@@ -1,0 +1,46 @@
+---
+
+- name: Install ipa-server packages
+  hosts: digital_ocean_centos_7
+  become: true
+  gather_facts: true
+
+  vars: 
+     ipa_server_ip        : 68.183.220.64
+     ipa_server           : pol
+     domain_name          : ldap.loc
+     ipa_server_hostname  : pol.ldap.loc
+     realm                : LDAP.LOC
+     dir_man_password     : 12345678
+     admin_user_password  : 12345678
+     dns_forwarder        : 8.8.8.8
+
+    
+
+  tasks:
+
+    - name: Adding ip and name+domen.name in hosts
+      template: src=etc_hosts.j2 dest=/etc/hosts
+
+    - name: Adding ip resolv.conf
+      lineinfile: dest=/etc/resolv.conf line='nameserver {{ ipa_server_ip }}'
+
+
+    - name: Install ipa-server and all pack
+      yum: name={{ item }} state=present
+      with_items:
+      - ipa-server 
+      - bind 
+      - bind-dyndb-ldap
+      - ipa-server-dns
+
+    - name: Configure ipa-server
+      shell: > 
+       ipa-server-install -U
+       --setup-dns
+       --hostname={{ ipa_server_hostname }}
+       --domain={{ domain_name }}
+       --realm={{ realm }}
+       --ds-password={{ dir_man_password }}
+       --admin-password={{ admin_user_password }}
+       --forwarder={{ dns_forwarder }}

@@ -1,0 +1,40 @@
+---
+- name: Install ipa-clients
+  hosts: gcp_centos_7
+  become: true
+  gather_facts: true
+
+  vars: 
+     ipa_server_ip        : 68.183.220.64
+     domain_name          : ldap.loc
+     ipa_server_hostname  : pol.ldap.loc
+     realm                : LDAP.LOC
+     admin_user_password  : 12345678
+     ipa_admin            : admin 
+
+  tasks:
+
+  
+    - name: Adding ip and name+domen.name in hosts
+      lineinfile: dest=/etc/hosts line='{{ ipa_server_ip }} {{ ipa_server_hostname }} {{ ipa_server_hostname }}'  
+
+  #  - name: Adding ip resolv.conf
+  #    lineinfile: dest=/etc/resolv.conf line='nameserver {{ ipa_server_ip }}'
+    
+    - name: Install ipa-client
+      yum: name={{ item }} state=present
+      with_items:
+       - ipa-client
+  
+  
+    - name: Setup IPA client to IPA server unattended
+      shell: >
+       ipa-client-install -U
+       --force-join
+       --domain {{ domain_name }}
+       --principal {{ ipa_admin }}@{{ realm }}
+       --password {{ admin_user_password }}
+       --server {{ ipa_server_hostname }}
+       --mkhomedir
+       --realm {{ realm }}
+
