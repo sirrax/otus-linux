@@ -12,7 +12,10 @@ GCP `35.198.88.157`, `35.198.104.177` - выполняют роль клиент
 - playbook_server_install_free_ipa.yml
 - playbook_client_install_free_ipa.yml
 
-Сервер LDAP доступен по:  https://pol.ldap.loc/ 
+Сервер LDAP доступен по:  https://pol.ldap.loc/  
+
+для доступа в файл hosts необходимо добавить строку: `68.183.220.64 pol.ldap.loc`
+
 
 login - admin
 
