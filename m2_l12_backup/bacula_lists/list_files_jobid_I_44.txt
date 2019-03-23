@@ -1,0 +1,30 @@
+Connecting to Director 172.17.20.100:9101
+1000 OK: bacula-dir Version: 5.2.13 (19 February 2013)
+Enter a period to cancel a command.
+list files jobid=44
+Automatically selected Catalog: MyCatalog
+Using Catalog "MyCatalog"
++----------+
+| Filename |
++----------+
+| /etc/passwd |
+| /etc/    |
+| /etc/group- |
+| /etc/gshadow- |
+| /etc/group |
+| /etc/gshadow |
+| /etc/passwd- |
+| /etc/shadow- |
+| /etc/shadow |
+| /home/   |
+| /home/test7/ |
+| /home/test7/.bash_logout |
+| /home/test7/.bash_profile |
+| /home/test7/.bashrc |
++----------+
++-------+-------------------+---------------------+------+-------+----------+----------+-----------+
+| JobId | Name              | StartTime           | Type | Level | JobFiles | JobBytes | JobStatus |
++-------+-------------------+---------------------+------+-------+----------+----------+-----------+
+|    44 | Backup-client1-FD | 2019-03-23 20:40:02 | B    | I     |       14 |    3,648 | T         |
++-------+-------------------+---------------------+------+-------+----------+----------+-----------+
+You have messages.

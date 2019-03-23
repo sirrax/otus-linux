@@ -1,0 +1,46 @@
+Connecting to Director 172.17.20.100:9101
+1000 OK: bacula-dir Version: 5.2.13 (19 February 2013)
+Enter a period to cancel a command.
+list files jobid=35
+Automatically selected Catalog: MyCatalog
+Using Catalog "MyCatalog"
++----------+
+| Filename |
++----------+
+| /etc/passwd |
+| /etc/    |
+| /etc/group- |
+| /etc/gshadow- |
+| /etc/group |
+| /etc/gshadow |
+| /etc/passwd- |
+| /etc/shadow- |
+| /etc/shadow |
+| /home/   |
+| /home/vagrant/test5/ |
+| /home/vagrant/test5/test6 |
+| /home/vagrant/test5/test7 |
+| /home/vagrant/test5/test5 |
+| /home/test1/ |
+| /home/test1/.bash_logout |
+| /home/test1/.bash_profile |
+| /home/test1/.bashrc |
+| /home/test2/ |
+| /home/test2/.bash_logout |
+| /home/test2/.bash_profile |
+| /home/test2/.bashrc |
+| /home/test3/ |
+| /home/test3/.bash_logout |
+| /home/test3/.bash_profile |
+| /home/test3/.bashrc |
+| /home/test4/ |
+| /home/test4/.bash_logout |
+| /home/test4/.bash_profile |
+| /home/test4/.bashrc |
++----------+
++-------+-------------------+---------------------+------+-------+----------+----------+-----------+
+| JobId | Name              | StartTime           | Type | Level | JobFiles | JobBytes | JobStatus |
++-------+-------------------+---------------------+------+-------+----------+----------+-----------+
+|    35 | Backup-client1-FD | 2019-03-23 19:35:02 | B    | D     |       30 |    4,549 | T         |
++-------+-------------------+---------------------+------+-------+----------+----------+-----------+
+You have messages.

@@ -1,0 +1,55 @@
+Connecting to Director 172.17.20.100:9101
+1000 OK: bacula-dir Version: 5.2.13 (19 February 2013)
+Enter a period to cancel a command.
+list jobs
+Automatically selected Catalog: MyCatalog
+Using Catalog "MyCatalog"
++-------+-------------------+---------------------+------+-------+----------+------------+-----------+
+| JobId | Name              | StartTime           | Type | Level | JobFiles | JobBytes   | JobStatus |
++-------+-------------------+---------------------+------+-------+----------+------------+-----------+
+|     1 | BackupLocalFiles  | 2019-03-20 18:27:40 | B    | F     |        0 |          0 | f         |
+|     2 | BackupLocalFiles  | 2019-03-20 19:30:39 | B    | F     |        0 |          0 | f         |
+|     3 | BackupLocalFiles  | 2019-03-20 19:37:27 | B    | F     |        0 |          0 | f         |
+|     4 | BackupLocalFiles  | 2019-03-20 19:49:44 | B    | F     |        0 |          0 | f         |
+|     5 | BackupLocalFiles  | 2019-03-23 11:45:30 | B    | F     |        0 |          0 | f         |
+|     6 | BackupLocalFiles  | 2019-03-23 12:29:44 | B    | F     |        0 |          0 | f         |
+|     7 | BackupLocalFiles  | 2019-03-23 13:24:27 | B    | F     |        0 |          0 | f         |
+|     8 | BackupLocalFiles  | 2019-03-23 13:32:07 | B    | F     |        1 |        533 | T         |
+|     9 | Backup-client1-FD | 2019-03-23 16:14:37 | B    | F     |    2,413 | 10,369,180 | T         |
+|    10 | Backup-client1-FD | 2019-03-23 16:24:37 | B    | F     |    2,413 | 10,369,180 | T         |
+|    11 | Backup-client1-FD | 2019-03-23 16:40:03 | B    | I     |        0 |          0 | T         |
+|    12 | Backup-client1-FD | 2019-03-23 16:50:03 | B    | I     |        0 |          0 | T         |
+|    13 | Backup-client1-FD | 2019-03-23 17:00:03 | B    | I     |        5 |          0 | T         |
+|    14 | Backup-client1-FD | 2019-03-23 17:00:05 | B    | I     |        5 |          0 | T         |
+|    15 | Backup-client1-FD | 2019-03-23 17:10:02 | B    | F     |    2,417 | 10,369,180 | T         |
+|    16 | Backup-client1-FD | 2019-03-23 17:10:06 | B    | I     |        0 |          0 | T         |
+|    17 | Backup-client1-FD | 2019-03-23 17:20:02 | B    | I     |        8 |      5,689 | T         |
+|    18 | Backup-client1-FD | 2019-03-23 17:25:02 | B    | F     |    2,420 | 10,369,186 | T         |
+|    19 | Backup-client1-FD | 2019-03-23 17:30:02 | B    | I     |        0 |          0 | T         |
+|    20 | Backup-client1-FD | 2019-03-23 17:35:02 | B    | I     |        0 |          0 | T         |
+|    21 | Backup-client1-FD | 2019-03-23 17:40:02 | B    | I     |        0 |          0 | T         |
+|    22 | Backup-client1-FD | 2019-03-23 17:50:02 | B    | I     |        0 |          0 | T         |
+|    23 | Backup-client1-FD | 2019-03-23 18:05:02 | B    | F     |    2,417 | 10,369,186 | T         |
+|    24 | Backup-client1-FD | 2019-03-23 18:10:02 | B    | I     |        0 |          0 | T         |
+|    25 | Backup-client1-FD | 2019-03-23 18:21:02 | B    | F     |    2,419 | 10,369,186 | T         |
+|    26 | Backup-client1-FD | 2019-03-23 18:30:02 | B    | D     |        2 |         15 | T         |
+|    27 | Backup-client1-FD | 2019-03-23 18:40:36 | B    | I     |        0 |          0 | T         |
+|    28 | Backup-client1-FD | 2019-03-23 18:45:03 | B    | F     |    2,420 | 10,369,201 | T         |
+|    29 | Backup-client1-FD | 2019-03-23 18:50:03 | B    | I     |        0 |          0 | T         |
+|    30 | Backup-client1-FD | 2019-03-23 19:00:03 | B    | I     |        0 |          0 | T         |
+|    31 | Backup-client1-FD | 2019-03-23 19:05:03 | B    | D     |        3 |         34 | T         |
+|    32 | Backup-client1-FD | 2019-03-23 19:10:03 | B    | I     |       16 |      3,112 | T         |
+|    33 | Backup-client1-FD | 2019-03-23 19:20:03 | B    | I     |       14 |      3,202 | T         |
+|    34 | Backup-client1-FD | 2019-03-23 19:30:03 | B    | I     |       14 |      3,298 | T         |
+|    35 | Backup-client1-FD | 2019-03-23 19:35:02 | B    | D     |       30 |      4,549 | T         |
+|    36 | Backup-client1-FD | 2019-03-23 19:40:02 | B    | I     |        0 |          0 | T         |
+|    37 | Backup-client1-FD | 2019-03-23 19:50:02 | B    | I     |       14 |      3,476 | T         |
+|    38 | Backup-client1-FD | 2019-03-23 20:00:02 | B    | I     |        0 |          0 | T         |
+|    39 | Backup-client1-FD | 2019-03-23 20:05:02 | B    | D     |       34 |      5,007 | T         |
+|    40 | Backup-client1-FD | 2019-03-23 20:10:02 | B    | I     |        0 |          0 | T         |
+|    41 | Backup-client1-FD | 2019-03-23 20:20:02 | B    | I     |       14 |      3,563 | T         |
+|    42 | Backup-client1-FD | 2019-03-23 20:30:02 | B    | I     |        0 |          0 | T         |
+|    43 | Backup-client1-FD | 2019-03-23 20:35:02 | B    | D     |       38 |      5,463 | T         |
+|    44 | Backup-client1-FD | 2019-03-23 20:40:02 | B    | I     |       14 |      3,648 | T         |
++-------+-------------------+---------------------+------+-------+----------+------------+-----------+
+You have messages.

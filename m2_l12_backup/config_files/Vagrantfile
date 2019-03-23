@@ -1,0 +1,21 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "centos/7"
+  config.vm.box_check_update = true
+  
+
+  config.vm.define "server", primary: true do |s|
+    s.vm.hostname = 'bacula-server'
+    s.vm.network "private_network", ip: "172.17.20.100"
+    
+  end
+
+  config.vm.define "client1" do |c|
+    c.vm.hostname = 'bacula-client1'
+    c.vm.network "private_network", ip: "172.17.20.150"
+    
+  end
+  
+end
