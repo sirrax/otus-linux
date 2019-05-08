@@ -1,0 +1,79 @@
+# -*- mode: ruby -*-
+# vim: set ft=ruby :
+# -*- mode: ruby -*-
+# vim: set ft=ruby :
+
+MACHINES = {
+:inetRouter => {
+        :box_name => "centos/7",
+        #:public => {:ip => '10.10.10.1', :adapter => 1},
+        :net => [
+                  {adapter: 2, auto_config: false, virtualbox__intnet: "router-net"},
+                  {adapter: 3, auto_config: false, virtualbox__intnet: "router-net"},
+                   
+                ]
+  },
+:centralL3 => {
+        :box_name => "centos/7",
+        :net => [
+                   {adapter: 2, auto_config: false, virtualbox__intnet: "router-net"},
+                   {adapter: 3, auto_config: false, virtualbox__intnet: "router-net"},
+                   {adapter: 4, auto_config: false, virtualbox__intnet: "test-LAN"},
+                ]
+  },
+:testClient1 => {
+       :box_name => "centos/7",
+       :net => [
+                   {adapter: 2, auto_config: false, virtualbox__intnet: "test-LAN"}
+                ]
+},
+:testClient2 => {
+        :box_name => "centos/7",
+        :net => [
+                    {adapter: 2, auto_config: false, virtualbox__intnet: "test-LAN"}
+                ]
+},
+:testServer1 => {
+        :box_name => "centos/7",
+        :net => [
+                    {adapter: 2, auto_config: false, virtualbox__intnet: "test-LAN"}
+                ]
+},
+:testServer2 => {
+        :box_name => "centos/7",
+        :net => [
+                    {adapter: 2, auto_config: false, virtualbox__intnet: "test-LAN"}
+                ]
+},  
+
+	
+}
+
+Vagrant.configure("2") do |config|
+
+  MACHINES.each do |boxname, boxconfig|
+
+    config.vm.define boxname do |box|
+
+        box.vm.box = boxconfig[:box_name]
+		box.vm.host_name = boxname.to_s
+
+        boxconfig[:net].each do |ipconf|
+          box.vm.network "private_network", ipconf
+        end
+        
+        if boxconfig.key?(:public)
+          box.vm.network "public_network", boxconfig[:public]
+        end
+
+      #  config.vm.provision "ansible" do |ansible|
+      #    ansible.playbook = "provision.yml"
+      #    ansible.inventory_path = "inventory/hosts.yml"
+      config.vm.provision "ansible" do |ansible|
+        ansible.verbose = "vvv"
+        ansible.playbook = "provisioning/playbook.yml"
+        ansible.become = "true"
+      end
+      end  
+  end
+end

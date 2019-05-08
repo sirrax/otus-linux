@@ -1,0 +1,58 @@
+---
+- hosts: testClient1, testServer1, testClient2, testServer2
+  become: yes
+  tasks:
+  - name: copy ifcfg-eth1-vlan
+    copy: src=ifcfg-eth1-vlan dest=/etc/sysconfig/network-scripts/ifcfg-eth1
+
+- hosts: centralL3, inetRouter
+  become: yes
+  tasks:
+  - name: copy ifcfg-eth1-teaming
+    copy: src=ifcfg-eth1-teaming dest=/etc/sysconfig/network-scripts/ifcfg-eth1
+  - name: copy ifcfg-eth2-teaming
+    copy: src=ifcfg-eth2-teaming dest=/etc/sysconfig/network-scripts/ifcfg-eth2
+      
+- hosts: testClient1
+  become: yes
+  tasks:
+  - name: copy ifcfg-eth1-client1.100
+    copy: src=ifcfg-eth1-client1.100 dest=/etc/sysconfig/network-scripts/ifcfg-eth1.100
+  
+- hosts: testServer1
+  become: yes
+  tasks:
+  - name: copy ifcfg-eth1-server1.100
+    copy: src=ifcfg-eth1-server1.100 dest=/etc/sysconfig/network-scripts/ifcfg-eth1.100
+
+- hosts: testClient2
+  become: yes
+  tasks:
+  - name: copy ifcfg-eth1-client2.101
+    copy: src=ifcfg-eth1-client2.101 dest=/etc/sysconfig/network-scripts/ifcfg-eth1.100
+  
+- hosts: testServer2
+  become: yes
+  tasks:
+  - name: copy ifcfg-eth1-server2.101
+    copy: src=ifcfg-eth1-server2.101 dest=/etc/sysconfig/network-scripts/ifcfg-eth1.100
+
+
+- hosts: centralL3
+  become: yes
+  tasks:
+  - name: copy ifcfg-team0-centralR
+    copy: src=ifcfg-team0-centralRouter dest=/etc/sysconfig/network-scripts/ifcfg-team0
+
+- hosts: inetRouter
+  become: yes
+  tasks:
+  - name: copy ifcfg-team0-inetRouter
+    copy: src=ifcfg-team0-inetRouter dest=/etc/sysconfig/network-scripts/ifcfg-team0
+    
+    
+- hosts: all
+  become: yes
+  tasks:    
+  - name: systemctl restart network
+    service: name=network state=restarted enabled=yes

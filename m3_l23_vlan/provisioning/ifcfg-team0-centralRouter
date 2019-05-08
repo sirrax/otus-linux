@@ -1,0 +1,8 @@
+DEVICE=team0
+ONBOOT=yes
+TYPE=Bond
+IPADDR=192.168.255.2
+PREFIX=30         
+BOOTPROTO=static
+DEVICETYPE="Team"
+TEAM_CONFIG='{ "runner" : {  "name" : "activebackup",  "hwaddr_policy" : "by_active" }, "link_watch" : {  "name" : "ethtool" } }'
