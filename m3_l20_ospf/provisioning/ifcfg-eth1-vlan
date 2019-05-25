@@ -1,0 +1,5 @@
+ONBOOT=yes
+BOOTPROTO=none
+TYPE=Ethernet
+DEVICE=eth1
+NM_CONTROLLED=no

@@ -1,0 +1,64 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+  - name: copy ifcfg-eth1-vlan
+    copy: src=ifcfg-eth1-vlan dest=/etc/sysconfig/network-scripts/ifcfg-eth1
+  - name: copy ifcfg-eth2-vlan
+    copy: src=ifcfg-eth2-vlan dest=/etc/sysconfig/network-scripts/ifcfg-eth2
+  - name: Установка Quagga
+    yum: name=quagga state=present
+  - name: copy ospf quagga
+    copy: src=quagga-daemons dest=/etc/quagga/daemons  
+  - name: Включаем форвард пакетов на уровне ядра_1 отключение rp_filter для всех устройств, принимающих участие в асимметричном роутинге
+    copy: src=sysctl-conf dest=/etc/sysctl.conf
+#  - name: при установке создается учетная запись quagga изменим владельцев конфигурационных файлов
+#    shell: >
+#      chown quagga:quagga /etc/quagga/ospfd.conf
+#      chown quagga:quagga /etc/quagga/zebra.conf  
+      
+- hosts: R1
+  become: yes
+  tasks:
+  - name: copy ifcfg-eth1-R1.12
+    copy: src=ifcfg-eth1-R1.12 dest=/etc/sysconfig/network-scripts/ifcfg-eth1.12
+  - name: copy ifcfg-eth2-R1.13
+    copy: src=ifcfg-eth2-R1.13 dest=/etc/sysconfig/network-scripts/ifcfg-eth2.13
+  - name: copy ospfd R1
+    copy: src=ospfd-conf-R1 dest=/etc/quagga/ospfd.conf  
+  - name: copy zebra R1
+    copy: src=zebra-conf-R1 dest=/etc/quagga/zebra.conf
+
+- hosts: R2
+  become: yes
+  tasks:
+  - name: copy ifcfg-eth1-R2.12
+    copy: src=ifcfg-eth1-R2.12 dest=/etc/sysconfig/network-scripts/ifcfg-eth1.12
+  - name: copy ifcfg-eth2-R2.23
+    copy: src=ifcfg-eth2-R2.23 dest=/etc/sysconfig/network-scripts/ifcfg-eth2.23
+  - name: copy ospfd R2
+    copy: src=ospfd-conf-R2 dest=/etc/quagga/ospfd.conf
+  - name: copy zebra R2
+    copy: src=zebra-conf-R2 dest=/etc/quagga/zebra.conf  
+
+- hosts: R3
+  become: yes
+  tasks:
+  - name: copy ifcfg-eth1-R3.13
+    copy: src=ifcfg-eth1-R3.13 dest=/etc/sysconfig/network-scripts/ifcfg-eth1.13
+  - name: copy ifcfg-eth2-R3.23
+    copy: src=ifcfg-eth2-R3.23 dest=/etc/sysconfig/network-scripts/ifcfg-eth2.23
+  - name: copy ospfd R3
+    copy: src=ospfd-conf-R3 dest=/etc/quagga/ospfd.conf
+  - name: copy zebra R3
+    copy: src=zebra-conf-R3 dest=/etc/quagga/zebra.conf  
+   
+- hosts: all
+  become: yes
+  tasks:
+  - name: systemctl restart network
+    service: name=network state=restarted enabled=yes
+  - name: systemctl start zebra
+    service: name=zebra state=restarted enabled=yes
+  - name: systemctl start ospfd
+    service: name=ospfd state=restarted enabled=yes
