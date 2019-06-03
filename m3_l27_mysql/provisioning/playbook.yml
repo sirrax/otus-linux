@@ -1,0 +1,88 @@
+---
+- hosts: all
+  become: yes
+
+  tasks:
+
+  - name: install percona rpm
+    yum:
+     name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+     state: present
+
+  - name: install percona selinux rpm
+    yum:
+     name: http://repo.percona.com/centos/7/RPMS/x86_64/Percona-Server-selinux-56-5.6.42-rel84.2.el7.noarch.rpm
+     state: present
+
+  - name: install Percona-Server-server-57
+    yum: pkg=Percona-Server-server-57 state=installed
+
+
+- hosts: master
+  become: yes
+  vars: 
+     mysql_password        : n-%Sirrax9IL!
+
+  tasks:
+  
+  - name: copy config Percona master
+    copy: src={{ item }} dest=/etc/my.cnf.d
+    with_fileglob:
+       - 01-base.cnf
+       - 02-max-connections.cnf
+       - 03-performance.cnf	
+       - 04-slow-query.cnf
+       - 05-binlog.cnf
+
+  - name: systemctl restart mysql
+    service: name=mysql state=restarted enabled=yes
+
+  - name: get root password
+    shell: "grep 'A temporary password is generated for root@localhost' /var/log/mysqld.log | awk -F ' ' '{print $(NF)}'"
+    register: root_password
+
+  - name: update expired root user password
+    command: mysql --user root --password={{ root_password.stdout }} --connect-expired-password --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ mysql_password }}';"
+ #   command: mysql --user root --password={{ mysql_password }} --connect-expired-password --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ mysql_password }}';"
+ # - name: create replication user
+ #   command: mysql --user root --password={{ mysql_password }} -e 'CREATE USER 'repl'@'%' IDENTIFIED BY '!OtusLinux2019''
+
+ # - name: priviledges to replication user
+ #   command: mysql --user root --password={{ mysql_password }}
+  
+ 
+
+- hosts: slave
+  become: yes
+  vars: 
+     mysql_password_slave  : n-%Priapp9IL!
+ #    mysql_password        : n-%Sirrax9IL!
+
+  tasks:
+
+  - name: copy config Percona slave
+    copy: src={{ item }} dest=/etc/my.cnf.d
+    with_fileglob:
+       - 02-max-connections.cnf
+       - 03-performance.cnf	
+       - 04-slow-query.cnf
+    
+  - name: copy config Percona binlog-slave
+    copy: src=05-binlog-slave.cnf dest=/etc/my.cnf.d/05-binlog.cnf
+    
+  
+  - name: copy config Percona base-slave
+    copy: src=01-base-slave.cnf dest=/etc/my.cnf.d/01-base.cnf
+      
+
+  - name: systemctl restart mysql
+    service: name=mysql state=restarted enabled=yes
+
+  - name: get root password
+    shell: "grep 'A temporary password is generated for root@localhost' /var/log/mysqld.log | awk -F ' ' '{print $(NF)}'"
+    register: root_password
+
+  - name: update expired root user password
+    command: mysql --user root --password={{ root_password.stdout }} --connect-expired-password --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ mysql_password_slave }}';"
+ #   command: mysql --user root --password={{ mysql_password }} --connect-expired-password --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ mysql_password_slave }}';"
+   
