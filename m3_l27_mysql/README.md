@@ -60,4 +60,4 @@ mysql> SHOW SLAVE STATUS\G
 
 Cкрин таблиц БД bet, поля таблицы bookmaker до и после добавления строк. Slave:
 
-![](https://raw.githubusercontent.com/sirrax/otus-linux/master/m3_l27_mysql/screen/slave-status.png)
+![](https://raw.githubusercontent.com/sirrax/otus-linux/master/m3_l27_mysql/screen/slave.png)
