@@ -1,0 +1,16 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+
+  - name: Install epel-releade reposytory
+    yum: name=epel-release state=present
+
+  - name: install nginx
+    yum: name=nginx state=present
+
+  - name: copy nginx.conf
+    copy: src=nginx.conf dest=/etc/nginx/nginx.conf
+
+  - name: Start Nginx for RedHat
+    systemd: name=nginx state=started enabled=yes
